@@ -18,7 +18,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class VentanaPrincipal extends JFrame {
-
+ 
 	private JPanel contentPane;
 	private JTextField txtUsuario;
 	private JPasswordField passwordField;

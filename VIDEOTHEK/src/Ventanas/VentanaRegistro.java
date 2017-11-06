@@ -21,6 +21,8 @@ public class VentanaRegistro extends JFrame {
 	private JTextField txtCorreo;
 
 	
+	
+	
 
 	/**
 	 * Create the frame.
