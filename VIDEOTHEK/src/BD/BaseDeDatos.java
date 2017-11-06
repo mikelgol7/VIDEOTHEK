@@ -122,5 +122,17 @@ public class BaseDeDatos {
 		return resultado;
 
 	}
+	
+	
+	public void registrarUsuario (String nombre, String contrasenya, String correo)
+	{
+		String query = "INSERT INTO usuario(nombre,contrasenya,correo) VALUES ('"+nombre+"','"+contrasenya+"','"+correo+"')";
+		try {
+			statement.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 }

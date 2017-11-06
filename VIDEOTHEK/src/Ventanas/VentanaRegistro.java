@@ -6,7 +6,11 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import BD.BaseDeDatos;
+
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JButton;
@@ -19,6 +23,7 @@ public class VentanaRegistro extends JFrame {
 	private JTextField txtNombreUsuario;
 	private JPasswordField passwordContrasenya;
 	private JTextField txtCorreo;
+	public static BaseDeDatos bd;
 
 	
 	
@@ -28,6 +33,7 @@ public class VentanaRegistro extends JFrame {
 	 * Create the frame.
 	 */
 	public VentanaRegistro() {
+		bd = new BaseDeDatos();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 523, 408);
 		contentPane = new JPanel();
@@ -45,6 +51,36 @@ public class VentanaRegistro extends JFrame {
 		contentPane.add(panelSur, BorderLayout.SOUTH);
 		
 		JButton btnAceptar = new JButton("ACEPTAR");
+		btnAceptar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				String nom = txtNombreUsuario.getText();
+				String con = passwordContrasenya.getText();
+				String cor = txtCorreo.getText();
+				
+				if(nom.equals(""))
+				{
+					JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN NOMBRE DE USUARIO.", "¡ERROR!", JOptionPane.ERROR_MESSAGE);
+				}
+				
+				else if(con.equals(""))
+				{
+					JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUNA CONTRASEÑA", "¡ERROR!", JOptionPane.ERROR_MESSAGE);
+				}
+				
+				else if (cor.equals(""))
+				{
+					JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN CORREO", "¡ERROR!", JOptionPane.ERROR_MESSAGE);
+				}
+				
+				else
+				{
+					bd.registrarUsuario(nom, con, cor);
+					JOptionPane.showMessageDialog(null, "TE ACABAS DE REGISTRAR EN VIDEOTHEK");
+					dispose();
+				}
+			}
+		});
 		panelSur.add(btnAceptar);
 		
 		JButton btnVolver = new JButton("VOLVER");

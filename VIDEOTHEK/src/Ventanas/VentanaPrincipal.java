@@ -71,6 +71,12 @@ public class VentanaPrincipal extends JFrame {
 		panelSur.add(btnRegistrarseAhora);
 
 		JButton btnAdministrador = new JButton("ADMINISTRADOR");
+		btnAdministrador.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				VentAdmin va = new VentAdmin();
+				va.setVisible(true);
+			}
+		});
 		panelSur.add(btnAdministrador);
 
 		JButton btnSalir = new JButton("SALIR");
