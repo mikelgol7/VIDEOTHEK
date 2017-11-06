@@ -76,6 +76,7 @@ public class VentanaPrincipal extends JFrame {
 				VentAdmin va = new VentAdmin();
 				va.setVisible(true);
 			}
+			
 		});
 		panelSur.add(btnAdministrador);
 

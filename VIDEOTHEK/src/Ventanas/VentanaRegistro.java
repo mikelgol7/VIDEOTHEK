@@ -26,8 +26,6 @@ public class VentanaRegistro extends JFrame {
 	public static BaseDeDatos bd;
 
 	
-	
-	
 
 	/**
 	 * Create the frame.

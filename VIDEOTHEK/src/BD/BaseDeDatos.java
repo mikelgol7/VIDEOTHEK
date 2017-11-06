@@ -123,6 +123,13 @@ public class BaseDeDatos {
 
 	}
 	
+	/**
+	 * Este metodo sirve para registrar los usuarios en la base de datos y así acceder a la plataforma de VIDEOTHEK.
+	 * 
+	 * @param nombre: El nombre introducido por el usuario
+	 * @param contrasenya: La contraseña introducida por el usuario.
+	 * @param correo: el correo introducido por el usuario.
+	 */
 	
 	public void registrarUsuario (String nombre, String contrasenya, String correo)
 	{
