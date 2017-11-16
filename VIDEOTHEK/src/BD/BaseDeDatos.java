@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.swing.JOptionPane;
+
 public class BaseDeDatos {
 
 	private Connection conexion;
@@ -83,7 +85,7 @@ public class BaseDeDatos {
 	 *            contrasenya introducida por el usuario
 	 * @return : 0 - Si no existe el usuario 1 - Si sí existe el usuario pero la
 	 *         contraseña no es correcta 2 - Si el nombre de usuario es correcto
-	 *         y la contraseña también
+	 *         y la contraseña también pero el correo es incorrecto 
 	 */
 
 	public int UsuarioRegistrado(String nombre, String contrasenya) {
@@ -111,7 +113,9 @@ public class BaseDeDatos {
 					resultado = 1;
 				}
 
-				else {
+				else 
+				{
+					
 					resultado = 2;
 				}
 			}
@@ -141,5 +145,87 @@ public class BaseDeDatos {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	/**
+	 * Este método sirve para saber si un administrador existe en la base de datos
+	 * @param usuario: El nombre de usuario introducido
+	 * @param contrasenya: La contraseña introducida.
+	 * @return 0 - Si no existe el administrador 1 - Si sí existe el administrador pero la
+	 *         contraseña no es correcta 2 - Si el nombre del administrador es correcto
+	 *         y la contraseña también
+	 */
+	public int adminRegistrado(String usuario, String contrasenya)
+	{
+		String query = "SELECT * FROM administrador WHERE usuario = '"+usuario+"'";
+		int resul = 0;
+		
+			try {
+			ResultSet rs = statement.executeQuery(query);
+			if(rs.next())//comprobamos si ha devulto una fila
+			{
+				String usu = rs.getString("usuario");
+				String con = rs.getString("contrasenya");
+				
+				if(!usu.equals(usuario))
+				{
+					resul = 0;
+				}
+				
+				else if(!con.equals(contrasenya))	
+				{
+					resul = 1;
+				}
+				
+				else
+				{
+					resul = 2;
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			return resul;
+			
+	}
+	
+	
+	public String devuelveContrasenya (String correo)
+	{
+		String query = "SELECT * FROM usuario WHERE correo = '"+correo+"'";
+		String contrasenya = "";
+		try {
+			ResultSet rs = statement.executeQuery(query);
+			
+			if(rs.next())
+			{
+				String cor = rs.getString("correo");
+				
+				if(!cor.equals(correo))
+				{
+					JOptionPane.showMessageDialog(null, "NO SE HA ENCONTRADO EL CORREO INTRODUCIDO");
+				}
+				
+				else
+				{
+					contrasenya = rs.getString("contrasenya");
+					
+				}
+				
+				
+				
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return contrasenya;
+		
+		
+		
+	}
+	
 
 }

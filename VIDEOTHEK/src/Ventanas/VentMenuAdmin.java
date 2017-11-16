@@ -7,53 +7,86 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 import java.awt.Font;
-import javax.swing.JMenuBar;
-import java.awt.Label;
-import java.awt.Button;
+import java.awt.Color;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class VentMenuAdmin extends JFrame {
 
 	private JPanel contentPane;
 
-	
-	/**
-	 * Create the frame.
-	 */
+
 	public VentMenuAdmin() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setSize(683, 690);
+		setLocationRelativeTo(null);
 		contentPane = new JPanel();
+		contentPane.setBackground(Color.BLACK);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
-		contentPane.setLayout(null);
 		
-		JLabel lblMenDelAdministrador = new JLabel("Men\u00FA del administrador");
-		lblMenDelAdministrador.setFont(new Font("Calibri Light", Font.BOLD, 15));
-		lblMenDelAdministrador.setBounds(126, 35, 184, 14);
-		contentPane.add(lblMenDelAdministrador);
+		JPanel norte = new JPanel();
+		norte.setBackground(Color.BLACK);
+		contentPane.add(norte, BorderLayout.NORTH);
 		
-		Button button = new Button("A\u00F1adir pel\u00EDcula");
-		button.setBounds(40, 84, 85, 22);
-		contentPane.add(button);
+		JLabel lblMenAdministrador = new JLabel("MEN\u00DA ADMINISTRADOR");
+		lblMenAdministrador.setForeground(Color.GREEN);
+		lblMenAdministrador.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
+		norte.add(lblMenAdministrador);
 		
-		Button button_1 = new Button("Eliminar pel\u00EDcula");
-		button_1.setBounds(40, 139, 85, 22);
-		contentPane.add(button_1);
+		JPanel centro = new JPanel();
+		centro.setBackground(Color.BLACK);
+		contentPane.add(centro, BorderLayout.CENTER);
+		centro.setLayout(null);
 		
-		Button button_2 = new Button("Editar pel\u00EDcula");
-		button_2.setBounds(40, 205, 85, 22);
-		contentPane.add(button_2);
+		JButton btnAadirPelcula = new JButton("A\u00D1ADIR PEL\u00CDCULA");
+		btnAadirPelcula.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
+		btnAadirPelcula.setBackground(Color.YELLOW);
+		btnAadirPelcula.setBounds(189, 77, 279, 44);
+		centro.add(btnAadirPelcula);
 		
-		Button button_3 = new Button("Eliminar Usuario");
-		button_3.setBounds(264, 84, 97, 22);
-		contentPane.add(button_3);
+		JButton btnEliminarPelcula = new JButton("ELIMINAR PEL\u00CDCULA");
+		btnEliminarPelcula.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
+		btnEliminarPelcula.setBackground(Color.YELLOW);
+		btnEliminarPelcula.setBounds(189, 150, 279, 44);
+		centro.add(btnEliminarPelcula);
 		
-		Button button_4 = new Button("Mostrar usuario");
-		button_4.setBounds(264, 139, 97, 22);
-		contentPane.add(button_4);
+		JButton btnEliminarUsuario = new JButton("ELIMINAR USUARIO");
+		btnEliminarUsuario.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
+		btnEliminarUsuario.setBackground(Color.YELLOW);
+		btnEliminarUsuario.setBounds(189, 227, 279, 44);
+		centro.add(btnEliminarUsuario);
 		
-		Button button_5 = new Button("Visualizar Ventas y Alquileres");
-		button_5.setBounds(226, 205, 170, 31);
-		contentPane.add(button_5);
+		JButton btnMostrarUsuarios = new JButton("MOSTRAR USUARIOS");
+		btnMostrarUsuarios.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
+		btnMostrarUsuarios.setBackground(Color.YELLOW);
+		btnMostrarUsuarios.setBounds(189, 300, 279, 44);
+		centro.add(btnMostrarUsuarios);
+		
+		JButton btnEditarPelcula = new JButton("EDITAR PEL\u00CDCULA");
+		btnEditarPelcula.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
+		btnEditarPelcula.setBackground(Color.YELLOW);
+		btnEditarPelcula.setBounds(189, 371, 279, 44);
+		centro.add(btnEditarPelcula);
+		
+		JButton btnVisualizarVentasY = new JButton("VISUALIZAR VENTAS Y ALQUILERES");
+		btnVisualizarVentasY.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
+		btnVisualizarVentasY.setBackground(Color.YELLOW);
+		btnVisualizarVentasY.setBounds(189, 446, 443, 44);
+		centro.add(btnVisualizarVentasY);
+		
+		JButton btnSalir = new JButton("SALIR");
+		btnSalir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnSalir.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
+		btnSalir.setBackground(Color.YELLOW);
+		btnSalir.setBounds(189, 516, 173, 44);
+		centro.add(btnSalir);
 	}
+
 }
