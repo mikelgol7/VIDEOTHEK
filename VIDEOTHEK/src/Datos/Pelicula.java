@@ -9,10 +9,9 @@ public class Pelicula {
 	private String categoria;
 	private int disponibles;
 	private float precio;
-
 	
 	public Pelicula(int id_pelicula, String nombre, int duracion, String descripcion, int anyo, String categoria,
-			int disponibles, float precio) {
+		int disponibles, float precio) {
 		this.id_pelicula = id_pelicula;
 		this.nombre = nombre;
 		this.duracion = duracion;
