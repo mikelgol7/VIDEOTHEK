@@ -5,12 +5,17 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import Datos.Alquiler;
 import Datos.Categoria;
+import Datos.Cliente;
+import Datos.Direccion;
 import Datos.Inventario;
 import Datos.Pelicula;
 
@@ -91,7 +96,7 @@ public class BaseDeDatos {
 	 *            contrasenya introducida por el usuario
 	 * @return : 0 - Si no existe el usuario 1 - Si sí existe el usuario pero la
 	 *         contraseña no es correcta 2 - Si el nombre de usuario es correcto
-	 *         y la contraseña también pero el correo es incorrecto 
+	 *         y la contraseña también pero el correo es incorrecto
 	 */
 
 	public int UsuarioRegistrado(String nombre, String contrasenya) {
@@ -119,9 +124,8 @@ public class BaseDeDatos {
 					resultado = 1;
 				}
 
-				else 
-				{
-					
+				else {
+
 					resultado = 2;
 				}
 			}
@@ -132,18 +136,22 @@ public class BaseDeDatos {
 		return resultado;
 
 	}
-	
+
 	/**
-	 * Este metodo sirve para registrar los usuarios en la base de datos y así acceder a la plataforma de VIDEOTHEK.
+	 * Este metodo sirve para registrar los usuarios en la base de datos y así
+	 * acceder a la plataforma de VIDEOTHEK.
 	 * 
-	 * @param nombre: El nombre introducido por el usuario
-	 * @param contrasenya: La contraseña introducida por el usuario.
-	 * @param correo: el correo introducido por el usuario.
+	 * @param nombre:
+	 *            El nombre introducido por el usuario
+	 * @param contrasenya:
+	 *            La contraseña introducida por el usuario.
+	 * @param correo:
+	 *            el correo introducido por el usuario.
 	 */
-	
-	public void registrarUsuario (String nombre, String contrasenya, String correo)
-	{
-		String query = "INSERT INTO usuario(nombre,contrasenya,correo) VALUES ('"+nombre+"','"+contrasenya+"','"+correo+"')";
+
+	public void registrarUsuario(String nombre, String contrasenya, String correo) {
+		String query = "INSERT INTO usuario(nombre,contrasenya,correo) VALUES ('" + nombre + "','" + contrasenya + "','"
+				+ correo + "')";
 		try {
 			statement.executeUpdate(query);
 		} catch (SQLException e) {
@@ -151,40 +159,39 @@ public class BaseDeDatos {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	/**
-	 * Este método sirve para saber si un administrador existe en la base de datos
-	 * @param usuario: El nombre de usuario introducido
-	 * @param contrasenya: La contraseña introducida.
-	 * @return 0 - Si no existe el administrador 1 - Si sí existe el administrador pero la
-	 *         contraseña no es correcta 2 - Si el nombre del administrador es correcto
-	 *         y la contraseña también
+	 * Este método sirve para saber si un administrador existe en la base de
+	 * datos
+	 * 
+	 * @param usuario:
+	 *            El nombre de usuario introducido
+	 * @param contrasenya:
+	 *            La contraseña introducida.
+	 * @return 0 - Si no existe el administrador 1 - Si sí existe el
+	 *         administrador pero la contraseña no es correcta 2 - Si el nombre
+	 *         del administrador es correcto y la contraseña también
 	 */
-	public int adminRegistrado(String usuario, String contrasenya)
-	{
-		String query = "SELECT * FROM administrador WHERE usuario = '"+usuario+"'";
+	public int adminRegistrado(String usuario, String contrasenya) {
+		String query = "SELECT * FROM administrador WHERE usuario = '" + usuario + "'";
 		int resul = 0;
-		
-			try {
+
+		try {
 			ResultSet rs = statement.executeQuery(query);
-			if(rs.next())//comprobamos si ha devulto una fila
+			if (rs.next())// comprobamos si ha devulto una fila
 			{
 				String usu = rs.getString("usuario");
 				String con = rs.getString("contrasenya");
-				
-				if(!usu.equals(usuario))
-				{
+
+				if (!usu.equals(usuario)) {
 					resul = 0;
 				}
-				
-				else if(!con.equals(contrasenya))	
-				{
+
+				else if (!con.equals(contrasenya)) {
 					resul = 1;
 				}
-				
-				else
-				{
+
+				else {
 					resul = 2;
 				}
 			}
@@ -192,34 +199,30 @@ public class BaseDeDatos {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-			return resul;
-			
+		return resul;
+
 	}
-	
-	
-	public String devuelveContrasenya (String correo)
-	{
-		String query = "SELECT * FROM usuario WHERE correo ='"+correo+"'";
+
+	public String devuelveContrasenya(String correo) {
+		String query = "SELECT * FROM usuario WHERE correo ='" + correo + "'";
 		String contrasenya = "";
 		try {
 			ResultSet rs = statement.executeQuery(query);
-			if(rs.next())
-			{
-				
-					contrasenya = contrasenya + rs.getString("contrasenya");
-				
-				
-			}else
+			if (rs.next()) {
+
+				contrasenya = contrasenya + rs.getString("contrasenya");
+
+			} else
 				contrasenya = contrasenya + " no hay contraseña.z<s ";
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return contrasenya;
-				
+
 	}
-	
+
 	/**
 	 * Método para obtener una lista de películas de la base de datos:
 	 * 
@@ -322,6 +325,276 @@ public class BaseDeDatos {
 
 		return devDisponibles;
 	}
-	
+
+	/**
+	 * 
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<Cliente> obtenerClientes() throws ParseException {
+		// Creamos nueva lista para guardar las categorias que vamos sacando de
+		// la base de datos:
+		List<Cliente> arrayClientes = new ArrayList<Cliente>();
+		List<Direccion> arrayDirecciones = obtenerDirecciones();
+		int posDIR = 0;
+		String query = "SELECT * FROM cliente";
+		try {
+			ResultSet rs = statement.executeQuery(query);
+
+			while (rs.next() == true) {
+				posDIR = obtenerDireccion(arrayDirecciones, rs.getInt("direccion"));
+				// Vamos almacenando todos los datos de cada una en la
+				// lista:
+				try {
+					arrayClientes
+							.add(new Cliente(rs.getInt("id_cliente"), rs.getString("nombre"), rs.getString("apellido"),
+									new SimpleDateFormat("yyyy-MM-dd").parse(rs.getString("fecha_nac")),
+									arrayDirecciones.get(posDIR).getCalle(), arrayDirecciones.get(posDIR).getCiudad(),
+									arrayDirecciones.get(posDIR).getPais()));
+				} catch (Exception E) {
+					arrayClientes.add(new Cliente(rs.getInt("id_cliente"), rs.getString("nombre"),
+							rs.getString("apellido"), new SimpleDateFormat("yyyy-MM-dd").parse("1995-07-15"),
+							arrayDirecciones.get(posDIR).getCalle(), arrayDirecciones.get(posDIR).getCiudad(),
+							arrayDirecciones.get(posDIR).getPais()));
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return arrayClientes;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public List<Direccion> obtenerDirecciones() {
+		List<Direccion> arrayDirecciones = new ArrayList<Direccion>();
+
+		String query = "SELECT * FROM direccion";
+		try {
+			ResultSet rs = statement.executeQuery(query);
+
+			while (rs.next() == true) {
+				// Vamos almacenando todos los datos de cada una en la lista:
+				arrayDirecciones.add(new Direccion(rs.getInt("id_direccion"), rs.getString("calle"),
+						rs.getString("ciudad"), rs.getString("pais")));
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return arrayDirecciones;
+	}
+
+	/**
+	 * 
+	 * @param arrayDirecciones
+	 * @param id
+	 * @return
+	 */
+	private int obtenerDireccion(List<Direccion> arrayDirecciones, int id) {
+		int devDirPOS = 0;
+		for (int i = 0; i < arrayDirecciones.size(); i++) {
+			if (arrayDirecciones.get(i).getId_direccion() == id) {
+				devDirPOS = i;
+			}
+		}
+
+		return devDirPOS;
+	}
+
+	/**
+	 * Método para obtener el id del cliente de la tabla usuarios:
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public int obtenerIdCliente(String user) {
+		int dev = 0;
+		String query = "SELECT * FROM Usuario";
+		try {
+			ResultSet rs = statement.executeQuery(query);
+
+			while (rs.next() == true) {
+				if (user.equals(rs.getString("nombre"))) {
+					dev = rs.getInt("cliente");
+				}
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return dev;
+	}
+
+	/**
+	 * 
+	 * @return
+	 * @throws ParseException
+	 */
+	public List<Alquiler> obtenerAlquileres() throws ParseException {
+		List<Alquiler> arrayAlquileres = new ArrayList<Alquiler>();
+		String query = "SELECT * FROM alquiler";
+		try {
+			ResultSet rs = statement.executeQuery(query);
+
+			while (rs.next() == true) {
+				// Vamos almacenando todos los datos de cada una en la lista:
+				arrayAlquileres.add(new Alquiler(rs.getInt("id_alquiler"),
+						new SimpleDateFormat("yyyy-MM-dd").parse(rs.getString("fech_alquiler")),
+						new SimpleDateFormat("yyyy-MM-dd").parse(rs.getString("fech_devolucion")), rs.getInt("cliente"),
+						rs.getInt("inventario")));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return arrayAlquileres;
+	}
+
+	/**
+	 * 
+	 * @param id_pelicula
+	 */
+	public void eliminarPelicula(int id_pelicula) {
+		String query = "DELETE FROM pelicula WHERE id_pelicula = " + id_pelicula;
+		String query_2 = "DELETE FROM inventario WHERE pelicula = " + id_pelicula;
+		try {
+			// Primero eliminamos la película de la tabla película:
+			statement.executeUpdate(query);
+			// Segundo eliminamos el inventario donde está situada la película
+			// en ela tabla inventario:
+			statement.executeUpdate(query_2);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 
+	 * @param nombre
+	 * @param duracion
+	 * @param descripcion
+	 * @param anyo
+	 * @param id_categoria
+	 * @return
+	 */
+	public boolean insertarPelicula(String nombre, int duracion, String descripcion, int anyo, int id_categoria,
+			float precio) {
+		boolean dev = true;
+		// No hace falta indicar el id_pelicula a asignar porque es incremental
+		String query = "INSERT INTO pelicula(nombre,duracion,descripcion,anyo,categoria,precio) VALUES ('" + nombre
+				+ "','" + duracion + "','" + descripcion + "','" + anyo + "','" + id_categoria + "','" + precio + "')";
+		try {
+			statement.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "¡ERROR NO SE PUDO INSERTAR PELICULA!");
+			dev = false;
+		}
+
+		return dev;
+	}
+
+	/**
+	 * 
+	 * @param disponibles
+	 * @param id_pelicula
+	 * @return
+	 */
+	public boolean insertarInventario(int disponibles, int id_pelicula) {
+		boolean dev = true;
+		// No hace falta indicar el id_pelicula a asignar porque es incremental
+		String query = "INSERT INTO inventario(disponible,pelicula) VALUES ('" + disponibles + "','" + id_pelicula
+				+ "')";
+		try {
+			statement.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			JOptionPane.showMessageDialog(null, "¡ERROR NO SE PUDO INSERTAR EL INVENTARIO!");
+			dev = false;
+		}
+
+		return dev;
+	}
+
+	/**
+	 * Método para insertar un nuevo alquiler:
+	 * 
+	 * @param alquiler
+	 * @return
+	 */
+	public boolean insertarAlquiler(Alquiler alquiler) {
+		boolean dev = true;
+		// No hace falta indicar el id_pelicula a asignar porque es incremental
+		String query = "INSERT INTO alquiler(fech_alquiler,fech_devolucion,cliente,inventario) VALUES ('"
+				+ alquiler.getFecha_alquiler() + "','" + alquiler.getFecha_devolucion() + "','" + alquiler.getCliente()
+				+ "','" + alquiler.getInventario() + "')";
+		try {
+			statement.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "¡ERROR NO SE PUDO INSERTAR EL ALQUILER!");
+			dev = false;
+		}
+
+		return dev;
+	}
+
+	/**
+	 * Método para actualizar la disponibilidad de las peliculas:
+	 * 
+	 * @param disponibles
+	 * @param id_pelicula
+	 * @return
+	 */
+	public boolean actualizarPeliculasDisponibles(int disponibles, int id_pelicula) {
+		boolean dev = true;
+		// No hace falta indicar el id_pelicula a asignar porque es incremental
+		String query = "UPDATE inventario SET disponible='" + disponibles + "'" + "WHERE pelicula='" + id_pelicula
+				+ "'";
+		try {
+			statement.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			JOptionPane.showMessageDialog(null, "¡ERROR NO SE PUDO ACTUALIZAR LA DISPONIBILIDAD DE LA PELÍCULA!");
+			dev = false;
+		}
+
+		return dev;
+	}
+
+	/**
+	 * Método para actualizar el precio de una película:
+	 * 
+	 * @param disponibles
+	 * @param id_pelicula
+	 * @return
+	 */
+	public boolean actualizarPrecioPelicula(float precio, int id_pelicula) {
+		boolean dev = true;
+		// No hace falta indicar el id_pelicula a asignar porque es incremental
+		String query = "UPDATE pelicula SET precio='" + precio + "' " + "WHERE id_pelicula='" + id_pelicula + "'";
+		try {
+			statement.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			JOptionPane.showMessageDialog(null, "¡ERROR NO SE PUDO ACTUALIZAR EL PRECIO DE LA PELÍCULA!");
+			dev = false;
+		}
+
+		return dev;
+	}
 
 }
