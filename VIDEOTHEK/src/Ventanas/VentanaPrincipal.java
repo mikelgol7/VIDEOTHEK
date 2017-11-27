@@ -1,33 +1,35 @@
 package Ventanas;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import javax.swing.JScrollPane;
+import javax.swing.LookAndFeel;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
 
-import BD.BaseDeDatos;
+import org.jvnet.substance.skin.SubstanceRavenLookAndFeel;
 
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.JPasswordField;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.Color;
-import javax.swing.JMenuBar;
-import java.awt.Font;
-import javax.swing.ImageIcon;
+import Datos.Cliente;
+import Paneles.PanelAdministrador;
+import Paneles.PanelIniciarSesion;
+import Paneles.PanelRegistro;
+import Paneles.PanelUsuario;
 
 public class VentanaPrincipal extends JFrame {
- 
+
 	private JPanel contentPane;
-	private JTextField txtUsuario;
-	private JPasswordField passwordField;
-	private BaseDeDatos bd;
-	
+	private JScrollPane contenedorDePaneles;
+	private int anchura;
+	private int altura;
+	private PanelIniciarSesion panelIniciarSesion = new PanelIniciarSesion(this);
+	private PanelUsuario panelUsuario;
+	private PanelAdministrador panelAdministrador;
+	private PanelRegistro panelRegistro = new PanelRegistro();
 
 	/**
 	 * Launch the application.
@@ -36,8 +38,10 @@ public class VentanaPrincipal extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					VentanaPrincipal frame = new VentanaPrincipal();
+					UIManager.setLookAndFeel((LookAndFeel) new SubstanceRavenLookAndFeel());
+					VentanaPrincipal frame = new VentanaPrincipal(500,300);
 					frame.setVisible(true);
+					frame.cargarPanelIniciarSesion();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -48,172 +52,92 @@ public class VentanaPrincipal extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public VentanaPrincipal() {
-		bd = new BaseDeDatos();
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(710, 715);
-		setLocationRelativeTo(null);
-		setResizable(false);
-		contentPane = new JPanel();
-		contentPane.setBackground(Color.BLACK);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);
-				
-
+	public VentanaPrincipal(int anchura, int altura) {
 		
-		JPanel panelNorte = new JPanel();
-		panelNorte.setBackground(Color.BLACK);
-		contentPane.add(panelNorte, BorderLayout.NORTH);
-
-		JLabel lblVentanaPrincipal = new JLabel("VENTANA PRINCIPAL");
-		lblVentanaPrincipal.setFont(new Font("Lucida Handwriting", Font.PLAIN, 19));
-		lblVentanaPrincipal.setForeground(Color.GREEN);
-		panelNorte.add(lblVentanaPrincipal);
-
-		JPanel Centro = new JPanel();
-		Centro.setBackground(Color.BLACK);
-		contentPane.add(Centro, BorderLayout.CENTER);
-		Centro.setLayout(null);
-
-		JLabel lblNewLabel = new JLabel("USUARIO:");
-		lblNewLabel.setFont(new Font("Lucida Handwriting", Font.PLAIN, 19));
-		lblNewLabel.setForeground(Color.GREEN);
-		lblNewLabel.setBounds(179, 213, 124, 39);
-		Centro.add(lblNewLabel);
-
-		JLabel lblContrasenya = new JLabel("CONTRASE\u00D1A:");
-		lblContrasenya.setFont(new Font("Lucida Handwriting", Font.PLAIN, 19));
-		lblContrasenya.setForeground(Color.GREEN);
-		lblContrasenya.setBounds(179, 287, 158, 39);
-		Centro.add(lblContrasenya);
-
-		txtUsuario = new JTextField();
-		txtUsuario.setFont(new Font("Tahoma", Font.PLAIN, 25));
-		txtUsuario.setBounds(406, 213, 168, 38);
-		Centro.add(txtUsuario);
-		txtUsuario.setColumns(10);
-
-		passwordField = new JPasswordField();
-		passwordField.setFont(new Font("Tahoma", Font.PLAIN, 25));
-		passwordField.setBounds(406, 287, 168, 38);
-		Centro.add(passwordField);
-
-		JButton btnAcceder = new JButton("ACCEDER");
-		btnAcceder.setIcon(new ImageIcon("C:\\Users\\Joseba\\git\\VIDEOTHEK\\VIDEOTHEK\\Imagenes\\Acceder.PNG"));
-		btnAcceder.setFont(new Font("Lucida Handwriting", Font.PLAIN, 19));
-		btnAcceder.setForeground(Color.BLACK);
-		btnAcceder.setBackground(Color.WHITE);
-		btnAcceder.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				String usuario = txtUsuario.getText();
-				String contrasenya = passwordField.getText();
-
-				if (usuario.equals("")) {
-					JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN USUARIO.", "¡ERROR!",
-							JOptionPane.ERROR_MESSAGE);
-					vaciarCampos();
-				}
-
-				else if (contrasenya.equals("")) {
-					JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUNA CONTRASEÑA.", "¡ERROR!",
-							JOptionPane.ERROR_MESSAGE);
-					vaciarCampos();
-				}
-
-				else {
-					int resul = bd.UsuarioRegistrado(usuario, contrasenya);
-
-					if (resul == 0) {
-						JOptionPane.showMessageDialog(null,
-								"EL USUARIO INTRODUCIDO NO ESTA REGISTRADO, DEBE DE ESTAR PREVIAMENTE REGISTRADO PARA ACCEDER A VIDEOTHEK");
-						vaciarCampos();
-					}
-
-					else if (resul == 1) {
-						JOptionPane.showMessageDialog(null, "LA CONTRASEÑA INTRODUCIDA NO ES CORRECTA", "¡ERROR!",
-								JOptionPane.ERROR_MESSAGE);
-						vaciarCampos();
-					}
-
-					else {
-						JOptionPane.showMessageDialog(null, "¡BIENVENIDO A VIDEOTHEK!");
-						dispose();
-						VentanaMenuUsuario vu = new VentanaMenuUsuario();
-						vu.setVisible(true);
-					}
-
-				}
-			}
-		});
-		btnAcceder.setBounds(139, 363, 403, 60);
-		Centro.add(btnAcceder);
+		//Antes de llamar a los métodos debemos asignar la anchura y altura al JFrame:
+		this.anchura = anchura;
+		this.altura = altura;
 		
-		JButton btnRegistrarseAhora = new JButton("REGISTRARSE ");
-		btnRegistrarseAhora.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
-		btnRegistrarseAhora.setBackground(Color.YELLOW);
-		btnRegistrarseAhora.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				VentanaRegistroUser vr = new VentanaRegistroUser();
-				vr.setVisible(true);
-			}
-		});
-		btnRegistrarseAhora.setBounds(55, 460, 248, 50);
-		Centro.add(btnRegistrarseAhora);
-		
-		JButton btnAdministrador = new JButton("ADMINISTRADOR");
-		btnAdministrador.setForeground(Color.BLACK);
-		btnAdministrador.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
-		btnAdministrador.setBackground(Color.YELLOW);
-		btnAdministrador.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				VentAdmin va = new VentAdmin();
-				va.setVisible(true);
-				dispose();
-			}
-		});
-		btnAdministrador.setBounds(406, 460, 248, 50);
-		Centro.add(btnAdministrador);
-		
-		JButton btnSalir = new JButton("SALIR");
-		btnSalir.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
-		btnSalir.setBackground(Color.YELLOW);
-		btnSalir.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "GRACIAS POR UTILIZAR EL PROGRAMA");
-				dispose();
-			}
-		});
-		btnSalir.setBounds(406, 553, 124, 50);
-		Centro.add(btnSalir);
-		
-		JLabel lblNewLabel_1 = new JLabel("");
-		lblNewLabel_1.setIcon(new ImageIcon("C:\\Users\\Joseba\\git\\VIDEOTHEK\\VIDEOTHEK\\Imagenes\\videothek_original.png"));
-		lblNewLabel_1.setBounds(164, 34, 378, 147);
-		Centro.add(lblNewLabel_1);
-		
-		JButton btnContraseaOlvidada = new JButton("CONTRASE\u00D1A OLVIDADA");
-		btnContraseaOlvidada.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String resul;
-				
-				String correo = JOptionPane.showInputDialog(null, "INTRODUCE TU CORREO ELECTRÓNICO");
-				resul = bd.devuelveContrasenya(correo);
-				//System.out.println("La contrasenya es: "+resul);
-				JOptionPane.showMessageDialog(null, resul);
-				
-			}
-		});
-		btnContraseaOlvidada.setFont(new Font("Lucida Handwriting", Font.BOLD, 19));
-		btnContraseaOlvidada.setBackground(Color.YELLOW);
-		btnContraseaOlvidada.setBounds(55, 553, 334, 50);
-		Centro.add(btnContraseaOlvidada);
+		inicializar();
+		componentes();
+		añadirComponentes();
+		eventos();				
 	}
+	
+	private void inicializar()
+	{
+		contentPane = new JPanel();
+		contenedorDePaneles = new JScrollPane();
+	}
+	
+	private void componentes()
+	{
+		contentPane.setBackground(Color.BLACK);
+		contentPane.setBorder(new LineBorder(Color.ORANGE, 2));
+		
+		//El contenedor se ajustará automáticamente a la anchura y altura pasadas por parámetro:
+		contenedorDePaneles.setBounds(0, 0, anchura - 6, altura - 35);
+	}
+	
+	private void añadirComponentes()
+	{
+		setBackground(Color.DARK_GRAY);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setResizable(false);
+		setSize(anchura, altura);
+		setLocationRelativeTo(null);
+		setContentPane(contentPane);	
+		
+		contentPane.setLayout(null);
+		contentPane.add(contenedorDePaneles);
 
-	// metodo que sirve para vaciar los campos
-	public void vaciarCampos() {
-		txtUsuario.setText("");
-		passwordField.setText("");
+	}
+	
+	private void eventos()
+	{
+		//Accedemos al evento del botón de volver del panel registro desde el JFrame VentanaPrincipal:
+		panelRegistro.btnVolver.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cargarPanelIniciarSesion();
+			}
+		});
+		//Accedemos al evento del botón de registrarse del panel iniciar sesión desde el JFrame VentanaPrincipal:
+		panelIniciarSesion.BotonRegistrarse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cargarPanelRegistro();
+			}
+		});
+	}
+	
+	//Método para cargar el panel de iniciar sesión en el scrollPane del JFrame VentanaPrincipal:
+	public void cargarPanelIniciarSesion()
+	{
+		//Cargamos el panel en el scrollPane: contenedorDePaneles
+		contenedorDePaneles.setViewportView(panelIniciarSesion);
+	}
+	
+	//Método para cargar el panel del usuario:
+	public void cargarPanelUsuario(Cliente cliente)
+	{
+		//Inicializamos el panel:
+		panelUsuario = new PanelUsuario(cliente);
+		//Cargamos el panel en el scrollPane: contenedorDePaneles
+		contenedorDePaneles.setViewportView(panelUsuario);
+	}
+	
+	//Método para cargar el panel del administrador:
+	public void cargarPanelAdministrador()
+	{
+		//Inicializamos el panel:
+		panelAdministrador = new PanelAdministrador();
+		//Cargamos el panel en el scrollPane: contenedorDePaneles
+		contenedorDePaneles.setViewportView(panelAdministrador);
+	}
+	
+	//Método para cargar el panel registro:
+	public void cargarPanelRegistro()
+	{
+		//Cargamos el panel en el scrollPane: contenedorDePaneles
+		contenedorDePaneles.setViewportView(panelRegistro);
 	}
 }

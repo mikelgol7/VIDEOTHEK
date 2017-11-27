@@ -193,29 +193,18 @@ public class BaseDeDatos {
 	
 	public String devuelveContrasenya (String correo)
 	{
-		String query = "SELECT * FROM usuario WHERE correo = '"+correo+"'";
+		String query = "SELECT * FROM usuario WHERE correo ='"+correo+"'";
 		String contrasenya = "";
 		try {
 			ResultSet rs = statement.executeQuery(query);
-			
 			if(rs.next())
 			{
-				String cor = rs.getString("correo");
 				
-				if(!cor.equals(correo))
-				{
-					JOptionPane.showMessageDialog(null, "NO SE HA ENCONTRADO EL CORREO INTRODUCIDO");
-				}
-				
-				else
-				{
-					contrasenya = rs.getString("contrasenya");
-					
-				}
+					contrasenya = contrasenya + rs.getString("contrasenya");
 				
 				
-				
-			}
+			}else
+				contrasenya = contrasenya + " no hay contraseña.z<s ";
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
