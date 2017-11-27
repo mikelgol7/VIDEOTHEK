@@ -5,8 +5,14 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
+
+import Datos.Categoria;
+import Datos.Inventario;
+import Datos.Pelicula;
 
 public class BaseDeDatos {
 
@@ -211,9 +217,110 @@ public class BaseDeDatos {
 		}
 		
 		return contrasenya;
-		
-		
-		
+				
+	}
+	
+	/**
+	 * Método para obtener una lista de películas de la base de datos:
+	 * 
+	 * @return
+	 */
+	public List<Pelicula> obtenerPeliculas() {
+		// Creamos nueva lista para guardar las películas que vamos sacando de
+		// la base de datos:
+		List<Pelicula> arrayPeliculas = new ArrayList<Pelicula>();
+		// Obtenemos antes las categorias de la bd:
+		List<Categoria> arrayCategorias = obtenerCategorias();
+		// Obtenemos antes el inventario de peliculas:
+		List<Inventario> arrayInventarios = obtenerInventarios();
+
+		String query = "SELECT * FROM pelicula";
+		try {
+			ResultSet rs = statement.executeQuery(query);
+
+			while (rs.next() == true) {
+
+				// Vamos almacenando todos los datos de cada una en la lista:
+				arrayPeliculas.add(new Pelicula(rs.getInt("id_pelicula"), rs.getString("nombre"), rs.getInt("duracion"),
+						rs.getString("descripcion"), rs.getInt("anyo"),
+						obtenerCategoria(arrayCategorias, rs.getInt("categoria")),
+						obtenerPeliculasDisponibles(arrayInventarios, rs.getInt("id_pelicula")),
+						rs.getFloat("precio")));
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return arrayPeliculas;
+	}
+
+	public List<Categoria> obtenerCategorias() {
+		// Creamos nueva lista para guardar las categorias que vamos sacando de
+		// la base de datos:
+		List<Categoria> arrayCategorias = new ArrayList<Categoria>();
+
+		String query = "SELECT * FROM categoria";
+		try {
+			ResultSet rs = statement.executeQuery(query);
+
+			while (rs.next() == true) {
+				// Vamos almacenando todos los datos de cada una en la lista:
+				arrayCategorias.add(new Categoria(rs.getInt("id_categoria"), rs.getString("nombre")));
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return arrayCategorias;
+	}
+
+	private String obtenerCategoria(List<Categoria> arrayCategorias, int id) {
+		String devCategoria = "";
+		for (int i = 0; i < arrayCategorias.size(); i++) {
+			if (arrayCategorias.get(i).getId_categoria() == id) {
+				devCategoria = arrayCategorias.get(i).getNombre();
+			}
+		}
+
+		return devCategoria;
+	}
+
+	public List<Inventario> obtenerInventarios() {
+		// Creamos nueva lista para guardar las categorias que vamos sacando de
+		// la base de datos:
+		List<Inventario> arrayInventarios = new ArrayList<Inventario>();
+
+		String query = "SELECT * FROM inventario";
+		try {
+			ResultSet rs = statement.executeQuery(query);
+
+			while (rs.next() == true) {
+				// Vamos almacenando todos los datos de cada una en la lista:
+				arrayInventarios.add(
+						new Inventario(rs.getInt("id_inventario"), rs.getInt("disponible"), rs.getInt("pelicula")));
+
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return arrayInventarios;
+	}
+
+	private int obtenerPeliculasDisponibles(List<Inventario> arrayInventarios, int id) {
+		int devDisponibles = 0;
+		for (int i = 0; i < arrayInventarios.size(); i++) {
+			if (arrayInventarios.get(i).getPelicula() == id) {
+				devDisponibles = arrayInventarios.get(i).getDisponibles();
+			}
+		}
+
+		return devDisponibles;
 	}
 	
 
