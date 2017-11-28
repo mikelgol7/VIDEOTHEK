@@ -79,6 +79,9 @@ public class PanelUsuario extends JPanel {
 		componentes();
 		añadirComponentes();
 		eventos();
+		
+		valoresComboBoxCategorias();
+		valoresComboBoxAños();
 	}
 
 	private void inicializar() {
@@ -205,5 +208,86 @@ public class PanelUsuario extends JPanel {
 	private void eventos() {
 		
 	}
+	
+	/**
+	 * Método para alquilar una película:
+	 * 
+	 * @param id_pelicula
+	 * @throws ParseException
+	 */
+	private void alquilarPelicula(int id_pelicula) throws ParseException {
+		if (comprobarPeliculaAlquilada(id_pelicula, cliente.getId_cliente()) == true) {
+			JOptionPane.showMessageDialog(null, "¡ESA PELÍCULA YA LA TIENES ALQUILADA!", "ERROR",
+					JOptionPane.ERROR_MESSAGE);
+		} else {
+			// Creamos nuevo alquiler y lo subimos a la base de datos:
+			Alquiler alquiler = new Alquiler(0, new SimpleDateFormat("yyyy-MM-dd").parse("2017-11-28"),
+					new SimpleDateFormat("yyyy-MM-dd").parse("2017-12-5"),
+					cliente.getId_cliente(), id_inventario_alquiler);
+			// Ahora ya podemos insertar el alquiler en la base de datos:
+			BaseDeDatos bd = new BaseDeDatos();
+			if (bd.insertarAlquiler(alquiler) == true) {
+				JOptionPane.showMessageDialog(null, "Acabas de alquiler la película correctamente. Gracias.");
+			}
+		}
+	}
+	
+	private int id_inventario_alquiler = 0;
 
+	/**
+	 * Método para comprobar si la pleícula ya está alguilada:
+	 * 
+	 * @param id_pelicula
+	 * @param id_cliente
+	 * @return
+	 * @throws ParseException
+	 */
+	private boolean comprobarPeliculaAlquilada(int id_pelicula, int id_cliente) throws ParseException {
+		// Devolver alquiler true/false:
+		boolean dev = false;
+		// Accedemos a la base de datos:
+		BaseDeDatos bd = new BaseDeDatos();
+		// Obtenemos los inventarios para buscar elinventario:
+		List<Inventario> listaInventarios = bd.obtenerInventarios();
+		// Obtenemos los clientes de la base de datos:
+		List<Alquiler> listaAlquileres = bd.obtenerAlquileres();
+
+		int id_inventario = 0;
+		// Buscamos inventario:
+		for (int i = 0; i < listaInventarios.size(); i++) {
+			if (id_pelicula == listaInventarios.get(i).getPelicula()) {
+				id_inventario = listaInventarios.get(i).getId_inventario();
+				id_inventario_alquiler = id_inventario;
+				break;
+			}
+		}
+
+		// Buscamos la película del cliente si la ha alquilado:
+		for (int i = 0; i < listaAlquileres.size(); i++) {
+			if (listaAlquileres.get(i).getCliente() == id_cliente
+					&& listaAlquileres.get(i).getInventario() == id_inventario) {
+				// Entonces es que el cliente ya habia alquilado dicha película:
+				dev = true;
+				break;
+			}
+		}
+
+		return dev;
+	}
+	private void valoresComboBoxCategorias() {
+		BaseDeDatos bd = new BaseDeDatos();
+		// Obtenemos primero las categorias de la base de datos:
+		List<Categoria> arrayCategorias = bd.obtenerCategorias();
+		// Introducimos las categorias en el combiBox:
+		for (Categoria c : arrayCategorias) {
+			comboBoxGenero.addItem(c.getNombre());
+		}
+	}
+
+	private void valoresComboBoxAños() {
+		// Introducimos años desde 2017-1900:
+		for (int i = 2017; i > 1900; i--) {
+			comboBoxAño.addItem(i);
+		}
+	}
 }
