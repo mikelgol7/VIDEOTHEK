@@ -596,5 +596,55 @@ public class BaseDeDatos {
 
 		return dev;
 	}
+	/**
+	 * Método para insertar nuevo cliente a partir del registro de un usuario:
+	 * 
+	 * @param cliente
+	 */
+	public void insertarCliente(Cliente cliente) {
+		// Lo primero es comprobar si la dirección donde vive no corresponda ya
+		// a una de la base de datos,
+		// Si es igual a una de la de la base de datos entonces solo asignaremos
+		// el id de esa dirección,
+		// Si no es igual entonces crearemos una nueva direcció y le asignaremos
+		// la nueva creada:
+		List<Direccion> arrayDirecciones = obtenerDirecciones();
+		String queryCliente = "";
+		boolean direccionRepetida = false;
+		int id_direccion_nueva = arrayDirecciones.size() + 1;
+		int id_direccion_repetida = 0;
+		for (int i = 0; i < arrayDirecciones.size(); i++) {
+			if (arrayDirecciones.get(i).getPais().equals(cliente.getPais())
+					&& arrayDirecciones.get(i).getCalle().equals(cliente.getCalle())
+					&& arrayDirecciones.get(i).getCiudad().equals(cliente.getCiudad())) {
+				direccionRepetida = true;
+				id_direccion_repetida = i + 1;
+			}
+		}
 
+		if (direccionRepetida == false) {
+			queryCliente = "INSERT INTO cliente(nombre,apellido,fecha_nac,direccion) VALUES ('" + cliente.getNombre()
+					+ "','" + cliente.getApellidos() + "','" + cliente.getFecha_nacimiento() + "','"
+					+ id_direccion_nueva + "')";
+		} else {
+			queryCliente = "INSERT INTO cliente(nombre,apellido,fecha_nac,direccion) VALUES ('" + cliente.getNombre()
+					+ "','" + cliente.getApellidos() + "','" + cliente.getFecha_nacimiento() + "','"
+					+ id_direccion_repetida + "')";
+		}
+		String queryDireccion = "INSERT INTO direccion(calle,ciudad,pais) VALUES ('" + cliente.getCalle() + "','"
+				+ cliente.getCiudad() + "','" + cliente.getPais() + "')";
+		try {
+			// Si ha puesto una dirección nueva:
+			if (direccionRepetida == false) {
+				statement.executeUpdate(queryDireccion);
+			}
+			// Sino ponemos la repetida y fuera:
+			statement.executeUpdate(queryCliente);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	
 }

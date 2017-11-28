@@ -153,6 +153,66 @@ public class PanelRegistro extends JPanel {
 	}
 
 	private void eventos() {
-	}
+		
+		btnRegistrase.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				registrarUsuario();
+			}
+		});
 
+	}
+	
+	private void registrarUsuario() {
+		String nombreUser = textFieldUser.getText();
+		String contra = String.valueOf(passwordFieldContra.getPassword());
+		String correo = textFieldCorreo.getText();
+
+		if (nombreUser.equals("") && contra.equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN NOMBRE DE USUARIO NI NINGUNA CONTRASEÑA.",
+					"¡ERROR!", JOptionPane.ERROR_MESSAGE);
+		} else if (nombreUser.equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN NOMBRE DE USUARIO", "¡ERROR!",
+					JOptionPane.ERROR_MESSAGE);
+		} else if (nombreUser.equals("") && correo.equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN NOMBRE DE USUARIO NI CORREO", "¡ERROR!",
+					JOptionPane.ERROR_MESSAGE);
+		} else if (contra.equals("") && correo.equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUNA CONTRASEÑA NI CORREO", "¡ERROR!",
+					JOptionPane.ERROR_MESSAGE);
+		} else if (contra.equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUNA CONTRASEÑA", "¡ERROR!",
+					JOptionPane.ERROR_MESSAGE);
+		} else if (correo.equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN CORREO", "¡ERROR!",
+					JOptionPane.ERROR_MESSAGE);
+		} else if (nombreUser.equals("") && correo.equals("") && contra.equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN NOMBRE DE USUARIO NI CORREO NI CONTRASEÑA",
+					"¡ERROR!", JOptionPane.ERROR_MESSAGE);
+		} else if (dateChooser.getDate() == null) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUNA FECHA DE NACIMIENTO", "¡ERROR!",
+					JOptionPane.ERROR_MESSAGE);
+		} else if (textFieldCalle.getText().equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUNA CALLE", "¡ERROR!",
+					JOptionPane.ERROR_MESSAGE);
+		} else if (textFieldApellidos.getText().equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN APELLIDO", "¡ERROR!",
+					JOptionPane.ERROR_MESSAGE);
+		} else if (textFieldCiudad.getText().equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUNA CIUDAD", "¡ERROR!",
+					JOptionPane.ERROR_MESSAGE);
+		} else if (textFieldNombre.getText().equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN NOMBRE", "¡ERROR!",
+					JOptionPane.ERROR_MESSAGE);
+		} else {
+			BaseDeDatos bd = new BaseDeDatos();
+			bd.registrarUsuario(nombreUser, contra, correo);
+			bd.insertarCliente(
+					new Cliente(0, textFieldNombre.getText(), textFieldApellidos.getText(), dateChooser.getDate(),
+							textFieldCalle.getText(), textFieldCiudad.getText(), (String) comboBox.getSelectedItem()));
+			JOptionPane.showMessageDialog(null, "NUEVO USUARIO REGISTRADO EN LA PLATAFORMA VIDEOTHEK");
+		}
+	}
 }
+
+
+
