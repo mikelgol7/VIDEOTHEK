@@ -198,6 +198,7 @@ public class PanelUsuario extends JPanel {
 		add(comboBoxAño);
 
 		scrollPane_1.setViewportView(textPaneDescripcion);
+		agregarPeliculasAlPanel();
 		scrollPane.setViewportView(panel);
 		panel.setLayout(gl_panel);
 	}
@@ -231,6 +232,68 @@ public class PanelUsuario extends JPanel {
 				buscarPeliculaPorNombre(arrayNombresPeliculasEncontradas);
 			}
 		});
+		
+		btnalquilarYaMismo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					alquilarPelicula(peliculaAAlquilar.getId_pelicula());
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	/**
+	 * Método para cargar todas las películas en el gridLayout creando botones
+	 * para cada una:
+	 */
+	private void agregarPeliculasAlPanel() {
+		// Primero obtenemos las películas de la base de datos:
+		BaseDeDatos bd = new BaseDeDatos();
+		arrayPeliculas = bd.obtenerPeliculas();
+		arrayBotones = new JToggleButton[arrayPeliculas.size()];
+		arrayBotonesPelicula = new ArrayList<BotonPelicula>();
+		boolean png = false;
+
+		// Segundo buscamos el id asociado a cada película y lo cotejamos con el
+		// id de las imágenes:
+		for (int i = 0; i < arrayPeliculas.size(); i++) {
+
+			// Inicializamos cada BOTON!:
+
+			ImageIcon icon = null;
+
+			try {
+				icon = new ImageIcon(PanelUsuario.class
+						.getResource("/Imagenes/peliculas/" + arrayPeliculas.get(i).getId_pelicula() + ".jpg"));
+			} catch (Exception E) {
+				png = true;
+			}
+
+			try {
+				if (png == true) {
+					icon = new ImageIcon(PanelUsuario.class
+							.getResource("/Imagenes/peliculas/" + arrayPeliculas.get(i).getId_pelicula() + ".png"));
+					png = false;
+				}
+			} catch (Exception E) {
+				// Si no existe imágen de la película se asignará una
+				// auutomáticamente:
+				icon = new ImageIcon(PanelUsuario.class.getResource("/Imagenes/peliculas/SINCARTEL.jpg"));
+			}
+
+			arrayBotones[i] = new JToggleButton(icon);
+			arrayBotones[i].setContentAreaFilled(false);
+			arrayBotones[i].setBorder(new LineBorder(SystemColor.textHighlight));
+			arrayBotonesPelicula.add(new BotonPelicula(arrayPeliculas.get(i).getId_pelicula()));
+
+			// Añadimos botón de la película al panel asignado para ello:
+			panel.add(arrayBotones[i]);
+		}
+
+		eventosBotonesPeplicula();
 	}
 	
 	/**
