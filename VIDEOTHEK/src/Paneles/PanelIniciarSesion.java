@@ -95,7 +95,116 @@ public class PanelIniciarSesion extends JPanel {
 	}
 
 	private void eventos(JFrame frame) {
+		
+		BotonAcceder.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				iniciarlizarVentana(comprobarCredenciales(), frame);
+			}
+		});
+		BotonContraseñaOlvidada.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null,
+						bd.devuelveContrasenya(JOptionPane.showInputDialog(null, "INTRODUCE TU CORREO ELECTRÓNICO")));
+			}
+		});
+		
+		
 	
 	}
+	private String comprobarCredenciales() {
+		String usuario = textField.getText();
+		String contrasenya = String.valueOf(passwordField.getPassword());
+		String dev = "TIPO_USUARIO";
 
+		if (usuario.equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUN USUARIO.", "¡ERROR!",JOptionPane.ERROR_MESSAGE);
+		}
+		else if (contrasenya.equals("")) {
+			JOptionPane.showMessageDialog(null, "NO HAS INTRODUCIDO NINGUNA CONTRASEÑA.", "¡ERROR!",JOptionPane.ERROR_MESSAGE);
+		}
+		else {
+			//Primero comprobamos si es ADMINISTRADOR:
+			int resulAdministrador = bd.adminRegistrado(usuario, contrasenya);
+			//Segundo comprobamos a ver si es USUARIO:
+			int resulUsuario = bd.UsuarioRegistrado(usuario, contrasenya);
+
+			if (resulAdministrador == 0 && resulUsuario == 0) {
+				JOptionPane.showMessageDialog(null,"EL USUARIO NO EXISTE EN LA BD");
+			}
+			else if (resulAdministrador == 1 || resulUsuario == 1) {
+				JOptionPane.showMessageDialog(null, "CONTRASEÑA INCORRECTA", "¡ERROR!",JOptionPane.ERROR_MESSAGE);
+			}
+			else {							
+				if(resulAdministrador!=0&&resulAdministrador!=1)
+				{
+					dev = "ADMIN";
+				}else{
+					dev = "USER";
+				}
+			}
+			
+			//ADMIN LOCAL SIN CONECTAR A BD:
+			if(textField.getText().equals("ADMIN")&&String.valueOf(passwordField.getPassword()).equals("12345")){
+				dev = "ADMIN";
+			}
+		}				
+		
+		return dev;
+	}
+	
+	private void iniciarlizarVentana(String tipoUsuario, JFrame frame)
+	{
+		if(tipoUsuario.equals(("USER")))
+		{
+			//Primero cerramos la ventana actual de las credenciales:
+			frame.dispose();
+			//Inicializamos nueva JFrame VentanaPrincipal pero con distintos parámetros de entrada:
+			VentanaPrincipal ventanaPrincipal = new VentanaPrincipal(1080+6,720+35);//800 (anchura del PanelUsuario), 600 (altura del PanelUsuario)
+			ventanaPrincipal.setVisible(true);
+			ventanaPrincipal.cargarPanelUsuario(buscarClienteEnBD(textField.getText()));
+			
+			//Mostramos mensaje:
+			JOptionPane.showMessageDialog(null, "BIENVENIDO "+textField.getText());
+		}else if(tipoUsuario.equals(("ADMIN")))
+		{
+			//Primero cerramos la ventana actual de las credenciales:
+			frame.dispose();
+			//Inicializamos nueva JFrame VentanaPrincipal pero con distintos parámetros de entrada:
+			VentanaPrincipal ventanaPrincipal = new VentanaPrincipal(1080+6,720+35);//800 (anchura del PanelAdministrador), 600 (altura del PanelAdministrador)
+			ventanaPrincipal.setVisible(true);
+			ventanaPrincipal.cargarPanelAdministrador();
+			
+			//Mostramos mensaje:
+			JOptionPane.showMessageDialog(null, "BIENVENIDO "+textField.getText());
+		}
+	}
+	
+	private Cliente buscarClienteEnBD(String user)
+	{
+		//Buscamos id cliente:
+		BaseDeDatos bd = new BaseDeDatos();
+		int id_cliente = bd.obtenerIdCliente(user);
+		int id_pos_cliente = 0;
+		//Buscamos cliente con el id_cliente:
+		List<Cliente> arrayClientes = null;
+		try {
+			arrayClientes = bd.obtenerClientes();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(int i = 0; i<arrayClientes.size(); i++)
+		{
+			if(arrayClientes.get(i).getId_cliente()==id_cliente)
+			{
+				id_cliente = arrayClientes.get(i).getId_cliente();
+				id_pos_cliente = i;
+			}
+		}
+		
+		return arrayClientes.get(id_pos_cliente);
+	}
+	
 }
+
+
