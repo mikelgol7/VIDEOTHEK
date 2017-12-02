@@ -1,8 +1,12 @@
 package Paneles;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -12,9 +16,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+
+import BD.BaseDeDatos;
+import Datos.Pelicula;
 
 public class PanelAdministrador extends JPanel {
 
@@ -175,6 +185,124 @@ public class PanelAdministrador extends JPanel {
 
 	private void eventos() {
 		
+		btnMostrarInventarioDe.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				mostrarPeliculas();
+			}
+		});
+		
 	}
+	private void columnasTabla(int i) {
+		// Creacion de las columnas de la tabla:
+		if (i == 0) {
+			tableModel.addColumn("ID");
+			tableModel.addColumn("NOMBRE");
+			tableModel.addColumn("DURACION");
+			tableModel.addColumn("DESCRIPCION");
+			tableModel.addColumn("AÑO");
+			tableModel.addColumn("CATEGORIA");
+			tableModel.addColumn("DISPONIBLES");
+			tableModel.addColumn("PRECIO");
+		} else if (i == 1) {
+			tableModel.addColumn("ID");
+			tableModel.addColumn("NOMBRE");
+			tableModel.addColumn("APELLIDOS");
+			tableModel.addColumn("FECHA NACIMIENTO");
+			tableModel.addColumn("CALLE");
+			tableModel.addColumn("CIUDAD");
+			tableModel.addColumn("PAIS");
+		} else if (i == 2) {
+			tableModel.addColumn("ID");
+			tableModel.addColumn("FECHA DE ALQUILER");
+			tableModel.addColumn("FECHA DE DEVOLUCION");
+			tableModel.addColumn("Nº CLIENTE");
+			tableModel.addColumn("Nº INVENTARIO");
+		}
+	}
+	
+	private void resaltarColumnas(JTable tabla, int numeroColumnas, int[] columnasAResaltar, boolean coumnaModificable,
+			int[] columnaAModificar) {
+		for (int i = 0; i < numeroColumnas; i++) {
+			// Indicamos como sera el resaltado de la tabla
+			for (int j = 0; j < columnasAResaltar.length; j++) {
+				if (i == columnasAResaltar[j]) {
+					tabla.getColumnModel().getColumn(i)
+							.setCellRenderer(new Resaltador(true, coumnaModificable, columnaAModificar));
+					break;
+				} else {
+					tabla.getColumnModel().getColumn(i)
+							.setCellRenderer(new Resaltador(false, coumnaModificable, columnaAModificar));
+				}
+			}
+		}
+	}
+	
+	
+	
+	private boolean peliculasEnTabla = false;
+	
+	private void mostrarPeliculas() {
+		BaseDeDatos bd = new BaseDeDatos();
+		tableModel = new DefaultTableModel();
+		columnasTabla(0);
+		List<Pelicula> arrayPeliculas = bd.obtenerPeliculas();
+		for (int i = 0; i < arrayPeliculas.size(); i++) {
+			tableModel.addRow(new Object[] { arrayPeliculas.get(i).getId_pelicula(), arrayPeliculas.get(i).getNombre(),
+					arrayPeliculas.get(i).getDuracion(), arrayPeliculas.get(i).getDescripcion(),
+					arrayPeliculas.get(i).getAnyo(), arrayPeliculas.get(i).getCategoria(),
+					arrayPeliculas.get(i).getDisponibles(), arrayPeliculas.get(i).getPrecio() });
+		}
 
+		// Introducimos el modelo en la tabla:
+		table.setModel(tableModel);
+		resaltarColumnas(table, 8, new int[] { 0, 3, 6, 7 }, true, new int[] { 6, 7 });
+		peliculasEnTabla = true;
+	}
+	public class Resaltador implements TableCellRenderer {
+		private boolean resaltado;
+		private boolean columnaModificable;
+		private int[] columna;
+		public final DefaultTableCellRenderer DEFAULT_RENDERER = new DefaultTableCellRenderer();
+
+		/**
+		 * Creamos el resaltador indicando que columna se coloreara por defecto
+		 * 
+		 * @param columna
+		 */
+		public Resaltador(boolean resaltado, boolean columnaModificable, int[] columna) {
+			this.resaltado = resaltado;
+			this.columnaModificable = columnaModificable;
+			this.columna = columna;
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			// Obtenemos la celda que se esta renderizando
+			Component c = DEFAULT_RENDERER.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+					column);
+			DEFAULT_RENDERER.setHorizontalAlignment(SwingConstants.CENTER);
+
+			// Solo marcaremos las columnas que quieran ser reslatadas:
+			if (resaltado == true) {
+				if (isSelected == true) {
+					c.setBackground(Color.GREEN);
+					c.setForeground(Color.BLACK);
+				} else {
+					c.setBackground(Color.BLUE);
+					c.setForeground(Color.BLACK);
+				}
+
+				for (int i = 0; i < columna.length; i++) {
+					if (columnaModificable == true && columna[i] == column) {
+						c.setBackground(Color.GREEN);
+						c.setForeground(Color.RED);
+					}
+				}
+
+			}
+			return c;
+		}
+	}
 }
+
