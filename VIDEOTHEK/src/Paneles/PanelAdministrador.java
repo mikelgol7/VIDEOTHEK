@@ -6,25 +6,40 @@ import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 
 import BD.BaseDeDatos;
+import Datos.Alquiler;
+import Datos.Categoria;
+import Datos.Cliente;
+import Datos.Inventario;
 import Datos.Pelicula;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+import javax.swing.JTextField;
+import javax.swing.JComboBox;
+import javax.swing.UIManager;
+import javax.swing.JTextPane;
 
 public class PanelAdministrador extends JPanel {
 
@@ -62,6 +77,10 @@ public class PanelAdministrador extends JPanel {
 		añadirComponentes();
 		eventos();
 
+		valoresComboBoxCategorias();
+		valoresComboBoxAños();
+		valoresComoboBoxDuraciones();
+		valoresComboBoxPrecios();
 	}
 
 	private void inicializar() {
@@ -184,14 +203,176 @@ public class PanelAdministrador extends JPanel {
 	}
 
 	private void eventos() {
-		
 		btnMostrarInventarioDe.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				mostrarPeliculas();
+				peliculasAlquiladasEnTabla = false;
+				peliculasDescripcionEnTabla = true;
 			}
 		});
-		
+		btnMostrarAlquileresDe.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					mostrarAlquileres();
+					peliculasEnTabla = false;
+					peliculasAlquiladasEnTabla = true;
+					peliculasDescripcionEnTabla = false;
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		btnMostrarClientes.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					mostrarClientes();
+					peliculasEnTabla = false;
+					peliculasAlquiladasEnTabla = false;
+					peliculasDescripcionEnTabla = false;
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		btnInsertarNuevaPelcula.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Antes de insertar hay que comprobar si los campos están
+				// correctos:
+				boolean camposCorrectos = true;
+				if (textFieldNombrePelicula.getText().equals("")) {
+					camposCorrectos = false;
+				}
+				if (textPaneDescripcion.getText().equals("")) {
+					camposCorrectos = false;
+				}
+
+				if (camposCorrectos == true) {
+					insertarNuevaPeliculaEnLaBD();
+				} else {
+					JOptionPane.showMessageDialog(null, "¡LOS CAMPOS ESTÁN INCOMPLETOS!", "¡ERROR!",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		btnEliminarPelcula.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (peliculasEnTabla == true) {
+					if (table.isRowSelected(rowSelected)) {
+						// Eliminamos película:
+						DefaultTableModel tm = (DefaultTableModel) table.getModel();
+						eliminarPeliculaSeleccionada((int) tm.getValueAt(table.getSelectedRow(), 0));
+					} else {
+						JOptionPane.showMessageDialog(null, "¡PRIMERO DEBES SELECCIONAR UNA PELÍCULA A ELIMINAR!",
+								"¡ERROR!", JOptionPane.ERROR_MESSAGE);
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "¡PRIMERO DIRIGETE A LA TABLA DE LAS PELICULAS!", "¡ERROR!",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (peliculasAlquiladasEnTabla == true) {
+					if (table.isCellSelected(table.getSelectedRow(), 3)) {
+						mostrarClienteDelAlquiler();
+					}
+					if (table.isCellSelected(table.getSelectedRow(), 4)) {
+						mostrarPeliculaAlquiladaDelAlquiler();
+					}
+				} else if (peliculasDescripcionEnTabla == true) {
+					if (table.isCellSelected(table.getSelectedRow(), 3)) {
+						mostrarDescripcionDePeliculas();
+					} else if (table.isCellSelected(table.getSelectedRow(), 6)) {
+						try {
+							actualizarPeliculasDisponibles(Integer.parseInt(JOptionPane
+									.showInputDialog("Introduzca cantidad de películas a poner disponibles: ")));
+						} catch (Exception E) {
+							JOptionPane.showMessageDialog(null, "OPERACIÓN CANCELADA");
+						}
+					} else if (table.isCellSelected(table.getSelectedRow(), 7)) {
+						try {
+							actualizarPrecioPelicula(
+									Float.parseFloat(JOptionPane.showInputDialog("Introduzca precio de película: ")));
+						} catch (Exception E) {
+							JOptionPane.showMessageDialog(null, "OPERACIÓN CANCELADA");
+						}
+					}
+				}
+				rowSelected = table.getSelectedRow();
+			}
+		});
+		btnInsertarNuevoInventario.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Primero comprobamos si el usuario ha seleccionado el id de la
+				// película de la tabla:
+				if (peliculasEnTabla == true) {
+					if (table.isCellSelected(table.getSelectedRow(), 0)) {
+						DefaultTableModel tm = (DefaultTableModel) table.getModel();
+						int id_pelicula = (int) tm.getValueAt(table.getSelectedRow(), 0);
+						insertarNuevoInventario(id_pelicula);
+					} else {
+						JOptionPane.showMessageDialog(null, "¡PRIMERO DEBES SELECCIONAR EL ID PELICULA EN LA TABLA!",
+								"¡ERROR!", JOptionPane.ERROR_MESSAGE);
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "¡NO ESTÁS EN LA TABLA DE INVENTARIO DE PELÍCULAS!", "¡ERROR!",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
 	}
+
+	private void valoresComboBoxCategorias() {
+		BaseDeDatos bd = new BaseDeDatos();
+		// Obtenemos primero las categorias de la base de datos:
+		List<Categoria> arrayCategorias = bd.obtenerCategorias();
+		// Introducimos las categorias en el combiBox:
+		for (Categoria c : arrayCategorias) {
+			comboBoxCategoria.addItem(c.getNombre());
+		}
+	}
+
+	private void valoresComboBoxAños() {
+		// Introducimos años desde 2017-1900:
+		for (int i = 2017; i > 1900; i--) {
+			comboBoxAnyo.addItem(i);
+		}
+	}
+
+	private void valoresComoboBoxDuraciones() {
+		// Introducimos duraciones desde 45 minutos hasta 345 minutos:
+		for (int i = 345; i > 45; i--) {
+			comboBoxDuracion.addItem(i);
+		}
+	}
+
+	private void valoresComboBoxPrecios() {
+		// Introducimos 100 precios diferentes:
+		float precio = 0.25F;
+		for (int i = 0; i < 100; i++) {
+			comboBoxPrecio.addItem(Redondear(precio, 2));
+			precio += 0.25F;
+		}
+	}
+
+	public float Redondear(float pNumero, int pCantidadDecimales) {
+		// the function is call with the values Redondear(625.3f, 2)
+		BigDecimal value = new BigDecimal(pNumero);
+		value = value.setScale(pCantidadDecimales, RoundingMode.HALF_EVEN); // here
+																			// the
+																			// value
+																			// is
+																			// correct
+																			// (625.30)
+		return value.floatValue(); // but here the values is 625.3
+	}
+
+	private int rowSelected = 0;
+
 	private void columnasTabla(int i) {
 		// Creacion de las columnas de la tabla:
 		if (i == 0) {
@@ -219,7 +400,7 @@ public class PanelAdministrador extends JPanel {
 			tableModel.addColumn("Nº INVENTARIO");
 		}
 	}
-	
+
 	private void resaltarColumnas(JTable tabla, int numeroColumnas, int[] columnasAResaltar, boolean coumnaModificable,
 			int[] columnaAModificar) {
 		for (int i = 0; i < numeroColumnas; i++) {
@@ -236,11 +417,11 @@ public class PanelAdministrador extends JPanel {
 			}
 		}
 	}
-	
-	
-	
+
 	private boolean peliculasEnTabla = false;
-	
+	private boolean peliculasAlquiladasEnTabla = false;
+	private boolean peliculasDescripcionEnTabla = false;
+
 	private void mostrarPeliculas() {
 		BaseDeDatos bd = new BaseDeDatos();
 		tableModel = new DefaultTableModel();
@@ -258,6 +439,234 @@ public class PanelAdministrador extends JPanel {
 		resaltarColumnas(table, 8, new int[] { 0, 3, 6, 7 }, true, new int[] { 6, 7 });
 		peliculasEnTabla = true;
 	}
+
+	private void mostrarClientes() throws ParseException {
+		BaseDeDatos bd = new BaseDeDatos();
+		tableModel = new DefaultTableModel();
+		columnasTabla(1);
+		List<Cliente> arrayClientes = bd.obtenerClientes();
+		for (int i = 0; i < arrayClientes.size(); i++) {
+			tableModel.addRow(new Object[] { arrayClientes.get(i).getId_cliente(), arrayClientes.get(i).getNombre(),
+					arrayClientes.get(i).getApellidos(), arrayClientes.get(i).getFecha_nacimiento(),
+					arrayClientes.get(i).getCalle(), arrayClientes.get(i).getCiudad(),
+					arrayClientes.get(i).getPais() });
+		}
+
+		// Introducimos el modelo en la tabla:
+		table.setModel(tableModel);
+		resaltarColumnas(table, 7, new int[] { -1 }, false, new int[] { -1 });
+	}
+
+	private void mostrarAlquileres() throws ParseException {
+		BaseDeDatos bd = new BaseDeDatos();
+		tableModel = new DefaultTableModel();
+		columnasTabla(2);
+		List<Alquiler> arrayAlquileres = bd.obtenerAlquileres();
+		for (int i = 0; i < arrayAlquileres.size(); i++) {
+			tableModel.addRow(new Object[] { arrayAlquileres.get(i).getId_alquiler(),
+					arrayAlquileres.get(i).getFecha_alquiler(), arrayAlquileres.get(i).getFecha_devolucion(),
+					arrayAlquileres.get(i).getCliente(), arrayAlquileres.get(i).getInventario() });
+		}
+
+		// Introducimos el modelo en la tabla:
+		table.setModel(tableModel);
+		resaltarColumnas(table, 5, new int[] { 3, 4 }, false, new int[] { -1 });
+	}
+
+	private void mostrarClienteDelAlquiler() {
+		// Primero obtener el valor de la celda seleccionada:
+		DefaultTableModel tm = (DefaultTableModel) table.getModel();
+		int cliente = (int) tm.getValueAt(table.getSelectedRow(), 3);
+
+		// Ahora tenemos que buscar el valor en todos los clientes y si
+		// corresponde mostrar el cliente:
+		BaseDeDatos bd = new BaseDeDatos();
+		tableModel = new DefaultTableModel();
+		columnasTabla(1);
+		List<Cliente> arrayClientes = null;
+		try {
+			arrayClientes = bd.obtenerClientes();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (int i = 0; i < arrayClientes.size(); i++) {
+			if (arrayClientes.get(i).getId_cliente() == cliente) {
+				// MOstramos el cliente en la tabla de abajo:
+				tableModel.addRow(new Object[] { arrayClientes.get(i).getId_cliente(), arrayClientes.get(i).getNombre(),
+						arrayClientes.get(i).getApellidos(), arrayClientes.get(i).getFecha_nacimiento(),
+						arrayClientes.get(i).getCalle(), arrayClientes.get(i).getCiudad(),
+						arrayClientes.get(i).getPais() });
+			}
+		}
+
+		// Introducimos el modelo en la tabla:
+		table_1.setModel(tableModel);
+		resaltarColumnas(table_1, 7, new int[] { 0, 1, 2, 3, 4, 5, 6 }, false, new int[] { -1 });
+	}
+
+	private void mostrarPeliculaAlquiladaDelAlquiler() {
+		// Primero obtener el valor de la celda seleccionada:
+		DefaultTableModel tm = (DefaultTableModel) table.getModel();
+		int inventario = (int) tm.getValueAt(table.getSelectedRow(), 4);
+
+		BaseDeDatos bd = new BaseDeDatos();
+		tableModel = new DefaultTableModel();
+		columnasTabla(0);
+		List<Pelicula> arrayPeliculas = bd.obtenerPeliculas();
+		List<Inventario> arrayInventarios = bd.obtenerInventarios();
+
+		for (int i = 0; i < arrayInventarios.size(); i++) {
+			// Buscamos el inventario:
+			if (inventario == arrayInventarios.get(i).getId_inventario()) {
+				// Buscamos la película:
+				for (int j = 0; j < arrayPeliculas.size(); j++) {
+					if (arrayPeliculas.get(j).getId_pelicula() == arrayInventarios.get(i).getPelicula()) {
+						// Mostramos la película:
+						tableModel.addRow(new Object[] { arrayPeliculas.get(i).getId_pelicula(),
+								arrayPeliculas.get(i).getNombre(), arrayPeliculas.get(i).getDuracion(),
+								arrayPeliculas.get(i).getDescripcion(), arrayPeliculas.get(i).getAnyo(),
+								arrayPeliculas.get(i).getCategoria(), arrayPeliculas.get(i).getDisponibles(),
+								arrayPeliculas.get(i).getPrecio() });
+					}
+				}
+			}
+		}
+
+		// Introducimos el modelo en la tabla:
+		table_1.setModel(tableModel);
+		resaltarColumnas(table_1, 8, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 }, true, new int[] { 6, 7 });
+	}
+
+	private void mostrarDescripcionDePeliculas() {
+		// Primero obtener el valor de la celda seleccionada:
+		DefaultTableModel tm = (DefaultTableModel) table.getModel();
+		String descripcion = (String) tm.getValueAt(table.getSelectedRow(), 3);
+		textPaneMostrarDescripcion.setText(descripcion);
+	}
+
+	/**
+	 * Método para eliminar película:
+	 * 
+	 * @param id_pelicula
+	 */
+	private void eliminarPeliculaSeleccionada(int id_pelicula) {
+		BaseDeDatos bd = new BaseDeDatos();
+		bd.eliminarPelicula(id_pelicula);
+		JOptionPane.showMessageDialog(null, "La película ha sido eliminada correctamente.");
+	}
+
+	/**
+	 * Método para actualizar la disponibilidad de una película a partir de la
+	 * celda seleccionada:
+	 * 
+	 * @param disponibles
+	 */
+	private void actualizarPeliculasDisponibles(int disponibles) {
+		if (disponibles >= 0) {
+			DefaultTableModel tm = (DefaultTableModel) table.getModel();
+			int id_pelicula = (int) tm.getValueAt(table.getSelectedRow(), 0);
+
+			BaseDeDatos bd = new BaseDeDatos();
+			if (bd.actualizarPeliculasDisponibles(disponibles, id_pelicula) == true) {
+				JOptionPane.showMessageDialog(null,
+						"Película actualizada correctamente, vuelva a actualizar el panel para ver los cambios.");
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "¡CANTIDAD INCORRECTA!", "ERROR!", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	/**
+	 * Método para actulizar el precio de una película a partir de la celda
+	 * seleccionada:
+	 * 
+	 * @param precio
+	 */
+	private void actualizarPrecioPelicula(float precio) {
+		if (precio >= 0) {
+			DefaultTableModel tm = (DefaultTableModel) table.getModel();
+			int id_pelicula = (int) tm.getValueAt(table.getSelectedRow(), 0);
+
+			BaseDeDatos bd = new BaseDeDatos();
+			if (bd.actualizarPrecioPelicula(precio, id_pelicula) == true) {
+				JOptionPane.showMessageDialog(null,
+						"Película actualizada correctamente, vuelva a actualizar el panel para ver los cambios.");
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "¡PRECIO INCORRECTO!", "ERROR", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	/**
+	 * Método para insertar nueva película:
+	 */
+	private void insertarNuevaPeliculaEnLaBD() {
+		// Primero debemos obtener todos los valores de los campos:
+		String nombre = textFieldNombrePelicula.getText();
+		String descripcion = textPaneDescripcion.getText();
+		float precio = (float) comboBoxPrecio.getSelectedItem();
+		int anyo = (int) comboBoxAnyo.getSelectedItem();
+		int duracion = (int) comboBoxDuracion.getSelectedItem();
+		int id_categoria = 0;
+		// El id de la categoría se saca a partir del nombre:
+		BaseDeDatos bd = new BaseDeDatos();
+		List<Categoria> arrayCategoria = bd.obtenerCategorias();
+		for (Categoria c : arrayCategoria) {
+			// Si el nombre cuadra sacamos el id:
+			if (c.getNombre().equals(comboBoxCategoria.getSelectedItem())) {
+				id_categoria = c.getId_categoria();
+			}
+		}
+
+		// Finalmente guardamos la película en la base de datos:
+		if (bd.insertarPelicula(nombre, duracion, descripcion, anyo, id_categoria, precio) == true) {
+			JOptionPane.showMessageDialog(null,
+					"La película: " + nombre + " ha sido insertada correctamente en la base de datos.");
+		}
+	}
+
+	/**
+	 * Método para insertar un nuevo inventario en la base de datos con las
+	 * películas disponibles:
+	 */
+	private void insertarNuevoInventario(int id_pelicula) {
+		// Primero comprobar si el id_pelicula seleccionado en la tabla no
+		// corresponde ya a algún inventario:
+		boolean todoCorrecto = true;
+		BaseDeDatos bd = new BaseDeDatos();
+		List<Inventario> arrayInventario = bd.obtenerInventarios();
+		for (Inventario i : arrayInventario) {
+			if (i.getPelicula() == id_pelicula) {
+				JOptionPane.showMessageDialog(null, "¡ESA PELÍCULA YA TIENE ASIGNADO UN INVENTARIO!", "¡ERROR!",
+						JOptionPane.ERROR_MESSAGE);
+				todoCorrecto = false;
+				break;
+			}
+		}
+
+		// Si todo ha ido bien pasamos a introducir la cantidad de películas de
+		// la película en la tabla inventario:
+		if (todoCorrecto == true) {
+			// Pedimos cantidad de película para poner a disposición de los
+			// clientes:
+			try {
+				int disponibles = Integer.parseInt(JOptionPane.showInputDialog(
+						"Introduzca cantidad de películas que desea poner a disposición de los clientes: "));
+				if (disponibles >= 0) {
+					// Insertamos valores en la BD:
+					if (bd.insertarInventario(disponibles, id_pelicula) == true) {
+						JOptionPane.showMessageDialog(null, "Inventario insertado correctamente. :D");
+					}
+				} else {
+					JOptionPane.showMessageDialog(null, "¡CANTIDAD INCORRECTA!", "¡ERROR!", JOptionPane.ERROR_MESSAGE);
+				}
+			} catch (Exception E) {
+				JOptionPane.showMessageDialog(null, "OPERACIÓN CANCELADA.");
+			}
+		}
+	}
+
 	public class Resaltador implements TableCellRenderer {
 		private boolean resaltado;
 		private boolean columnaModificable;
@@ -305,4 +714,3 @@ public class PanelAdministrador extends JPanel {
 		}
 	}
 }
-
