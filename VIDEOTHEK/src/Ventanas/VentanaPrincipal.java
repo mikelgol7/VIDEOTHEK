@@ -14,6 +14,7 @@ import javax.swing.border.LineBorder;
 
 import org.jvnet.substance.skin.SubstanceRavenLookAndFeel;
 
+import BD.BaseDeDatos;
 import Datos.Cliente;
 import Paneles.PanelAdministrador;
 import Paneles.PanelIniciarSesion;
@@ -30,6 +31,7 @@ public class VentanaPrincipal extends JFrame {
 	private PanelUsuario panelUsuario;
 	private PanelAdministrador panelAdministrador;
 	private PanelRegistro panelRegistro = new PanelRegistro();
+	private BaseDeDatos bd;
 
 	/**
 	 * Launch the application.
@@ -57,6 +59,7 @@ public class VentanaPrincipal extends JFrame {
 		//Antes de llamar a los métodos debemos asignar la anchura y altura al JFrame:
 		this.anchura = anchura;
 		this.altura = altura;
+		bd = new BaseDeDatos();
 		
 		inicializar();
 		componentes();

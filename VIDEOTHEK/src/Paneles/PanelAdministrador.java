@@ -67,11 +67,13 @@ public class PanelAdministrador extends JPanel {
 	private DefaultTableModel tableModel = new DefaultTableModel();
 	private JTable table_1;
 	private JScrollPane scrollPane_1;
+	private BaseDeDatos bd;
 
 	/**
 	 * Create the panel.
 	 */
 	public PanelAdministrador() {
+		bd = new BaseDeDatos();
 		inicializar();
 		componentes();
 		añadirComponentes();
@@ -327,7 +329,7 @@ public class PanelAdministrador extends JPanel {
 	}
 
 	private void valoresComboBoxCategorias() {
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		// Obtenemos primero las categorias de la base de datos:
 		List<Categoria> arrayCategorias = bd.obtenerCategorias();
 		// Introducimos las categorias en el combiBox:
@@ -423,7 +425,7 @@ public class PanelAdministrador extends JPanel {
 	private boolean peliculasDescripcionEnTabla = false;
 
 	private void mostrarPeliculas() {
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		tableModel = new DefaultTableModel();
 		columnasTabla(0);
 		List<Pelicula> arrayPeliculas = bd.obtenerPeliculas();
@@ -441,7 +443,7 @@ public class PanelAdministrador extends JPanel {
 	}
 
 	private void mostrarClientes() throws ParseException {
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		tableModel = new DefaultTableModel();
 		columnasTabla(1);
 		List<Cliente> arrayClientes = bd.obtenerClientes();
@@ -458,7 +460,7 @@ public class PanelAdministrador extends JPanel {
 	}
 
 	private void mostrarAlquileres() throws ParseException {
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		tableModel = new DefaultTableModel();
 		columnasTabla(2);
 		List<Alquiler> arrayAlquileres = bd.obtenerAlquileres();
@@ -480,7 +482,7 @@ public class PanelAdministrador extends JPanel {
 
 		// Ahora tenemos que buscar el valor en todos los clientes y si
 		// corresponde mostrar el cliente:
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		tableModel = new DefaultTableModel();
 		columnasTabla(1);
 		List<Cliente> arrayClientes = null;
@@ -510,7 +512,7 @@ public class PanelAdministrador extends JPanel {
 		DefaultTableModel tm = (DefaultTableModel) table.getModel();
 		int inventario = (int) tm.getValueAt(table.getSelectedRow(), 4);
 
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		tableModel = new DefaultTableModel();
 		columnasTabla(0);
 		List<Pelicula> arrayPeliculas = bd.obtenerPeliculas();
@@ -551,7 +553,7 @@ public class PanelAdministrador extends JPanel {
 	 * @param id_pelicula
 	 */
 	private void eliminarPeliculaSeleccionada(int id_pelicula) {
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		bd.eliminarPelicula(id_pelicula);
 		JOptionPane.showMessageDialog(null, "La película ha sido eliminada correctamente.");
 	}
@@ -610,7 +612,7 @@ public class PanelAdministrador extends JPanel {
 		int duracion = (int) comboBoxDuracion.getSelectedItem();
 		int id_categoria = 0;
 		// El id de la categoría se saca a partir del nombre:
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		List<Categoria> arrayCategoria = bd.obtenerCategorias();
 		for (Categoria c : arrayCategoria) {
 			// Si el nombre cuadra sacamos el id:
@@ -634,7 +636,7 @@ public class PanelAdministrador extends JPanel {
 		// Primero comprobar si el id_pelicula seleccionado en la tabla no
 		// corresponde ya a algún inventario:
 		boolean todoCorrecto = true;
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		List<Inventario> arrayInventario = bd.obtenerInventarios();
 		for (Inventario i : arrayInventario) {
 			if (i.getPelicula() == id_pelicula) {

@@ -213,7 +213,7 @@ public class BaseDeDatos {
 				contrasenya = contrasenya + rs.getString("contrasenya");
 
 			} else
-				contrasenya = contrasenya + " no hay contraseña.z<s ";
+				contrasenya = contrasenya + " no hay contraseña ";
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -545,7 +545,7 @@ public class BaseDeDatos {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "¡ERROR NO SE PUDO INSERTAR EL ALQUILER!");
+			JOptionPane.showMessageDialog(null, "Se ha alquilado la pelicula correctamente.");
 			dev = false;
 		}
 

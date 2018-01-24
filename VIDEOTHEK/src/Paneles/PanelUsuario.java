@@ -13,6 +13,7 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -69,6 +70,7 @@ public class PanelUsuario extends JPanel {
 	private JLabel labelDinero;
 	private JComboBox<Integer> comboBoxAño;
 	private JComboBox<String> comboBoxGenero;
+	public static BaseDeDatos bd;
 
 	private Cliente cliente;
 
@@ -76,11 +78,13 @@ public class PanelUsuario extends JPanel {
 	 * Create the panel.
 	 */
 	public PanelUsuario(Cliente cliente) {
+		bd = new BaseDeDatos();
 		this.cliente = cliente;
 		inicializar();
 		componentes();
 		añadirComponentes();
 		eventos();
+		
 		
 		valoresComboBoxCategorias();
 		valoresComboBoxAños();
@@ -251,7 +255,7 @@ public class PanelUsuario extends JPanel {
 	 */
 	private void agregarPeliculasAlPanel() {
 		// Primero obtenemos las películas de la base de datos:
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		arrayPeliculas = bd.obtenerPeliculas();
 		arrayBotones = new JToggleButton[arrayPeliculas.size()];
 		arrayBotonesPelicula = new ArrayList<BotonPelicula>();
@@ -312,7 +316,7 @@ public class PanelUsuario extends JPanel {
 					new SimpleDateFormat("yyyy-MM-dd").parse("2017-12-5"),
 					cliente.getId_cliente(), id_inventario_alquiler);
 			// Ahora ya podemos insertar el alquiler en la base de datos:
-			BaseDeDatos bd = new BaseDeDatos();
+			//BaseDeDatos bd = new BaseDeDatos();
 			if (bd.insertarAlquiler(alquiler) == true) {
 				JOptionPane.showMessageDialog(null, "Acabas de alquiler la película correctamente. Gracias.");
 			}
@@ -333,7 +337,7 @@ public class PanelUsuario extends JPanel {
 		// Devolver alquiler true/false:
 		boolean dev = false;
 		// Accedemos a la base de datos:
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		// Obtenemos los inventarios para buscar elinventario:
 		List<Inventario> listaInventarios = bd.obtenerInventarios();
 		// Obtenemos los clientes de la base de datos:
@@ -358,11 +362,11 @@ public class PanelUsuario extends JPanel {
 				break;
 			}
 		}
-
+		bd.desconectar();
 		return dev;
 	}
 	private void valoresComboBoxCategorias() {
-		BaseDeDatos bd = new BaseDeDatos();
+		//BaseDeDatos bd = new BaseDeDatos();
 		// Obtenemos primero las categorias de la base de datos:
 		List<Categoria> arrayCategorias = bd.obtenerCategorias();
 		// Introducimos las categorias en el combiBox:
